@@ -5,6 +5,8 @@ import com.expo.repository.AdminUserRepository;
 import com.expo.repository.BannerRepository;
 import com.expo.repository.CustomerRepository;
 import com.expo.repository.ExpoRepository;
+import com.expo.repository.TrainingAssignmentRepository;
+import com.expo.repository.TrainingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,6 +27,8 @@ public class DataSeeder implements ApplicationRunner {
     private final ExpoRepository expoRepository;
     private final CustomerRepository customerRepository;
     private final BannerRepository bannerRepository;
+    private final TrainingRepository trainingRepository;
+    private final TrainingAssignmentRepository trainingAssignmentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -65,6 +69,22 @@ public class DataSeeder implements ApplicationRunner {
             c.setPhone("01012345678");
             c.setPin(passwordEncoder.encode("1234"));
             customerRepository.save(c);
+        }
+
+        if (trainingRepository.count() == 0) {
+            Training t = new Training();
+            t.setTitle("박람회 운영 · 현장 체크인 절차 교육");
+            t.setDescription("입장 배지 확인과 현장 체크인 절차를 안내합니다. 영상을 끝까지 시청하면 이수됩니다.");
+            t.setYoutubeUrl("https://www.youtube.com/watch?v=aqz-KE-bpKQ");
+            t.setYoutubeVideoId("aqz-KE-bpKQ");
+            t.setCreatedBy(adminUserRepository.findByUsername("admin").orElse(null));
+            trainingRepository.save(t);
+            adminUserRepository.findByUsername("event1").ifPresent(ev -> {
+                TrainingAssignment ta = new TrainingAssignment();
+                ta.setTraining(t);
+                ta.setAssignee(ev);
+                trainingAssignmentRepository.save(ta);
+            });
         }
     }
 

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교육 수강</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: eventSidebar('training')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('교육 수강')}"></header>
+        <main class="content">
+            <div class="content-head"><h1 class="page-title">배정된 교육</h1></div>
+
+            <div class="panel">
+                <table class="data-table" th:unless="${assignments.isEmpty()}">
+                    <thead><tr><th>교육</th><th>시청률</th><th>상태</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="a : ${assignments}">
+                        <td th:text="${a.training.title}">교육</td>
+                        <td class="num" th:text="${#numbers.formatDecimal(a.progressRate, 1, 1)} + '%'">0.0%</td>
+                        <td><span class="badge"
+                                  th:classappend="${a.status.name() == 'COMPLETED' ? 'green' : (a.status.name() == 'IN_PROGRESS' ? 'cyan' : '')}"
+                                  th:text="${a.status.label}">상태</span></td>
+                        <td><a class="btn sm primary" th:href="@{/event/trainings/{id}(id=${a.id})}">
+                            <i class="ti ti-player-play" aria-hidden="true"></i> 수강</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-empty" th:if="${assignments.isEmpty()}">배정된 교육이 없습니다.</div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교육 생성</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('trainings')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('교육 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">교육 생성</h1>
+                <a class="btn" th:href="@{/admin/trainings}">목록으로</a>
+            </div>
+
+            <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+            <div class="panel" style="max-width:560px;">
+                <form th:action="@{/admin/trainings}" method="post" style="display:flex;flex-direction:column;gap:14px;">
+                    <div><label class="label">제목</label><br>
+                        <input type="text" name="title" required style="width:100%;"></div>
+                    <div><label class="label">YouTube 링크</label><br>
+                        <input type="text" name="youtubeUrl" required placeholder="https://www.youtube.com/watch?v=..." style="width:100%;"></div>
+                    <div><label class="label">설명</label><br>
+                        <textarea name="description" rows="4" style="width:100%;"></textarea></div>
+                    <div><button type="submit" class="btn primary">생성</button></div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

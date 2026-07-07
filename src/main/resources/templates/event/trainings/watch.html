@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title th:text="${training.title}">교육 수강</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: eventSidebar('training')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('교육 수강')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title" th:text="${training.title}">교육
+                    <span id="badge" class="badge"
+                          th:classappend="${assignment.status.name() == 'COMPLETED' ? 'green' : (assignment.status.name() == 'IN_PROGRESS' ? 'cyan' : '')}"
+                          th:text="${assignment.status.label}">상태</span>
+                </h1>
+                <a class="btn" th:href="@{/event/trainings}">목록으로</a>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi"><div class="kpi__label">이수 현황</div>
+                    <div class="kpi__value" id="statusText" style="font-size:20px;" th:text="${assignment.status.label}">미시작</div></div>
+                <div class="kpi"><div class="kpi__label">이수 조건</div>
+                    <div class="kpi__value" style="font-size:20px;">영상 끝까지</div></div>
+                <div class="kpi"><div class="kpi__label">이수 완료 혜택</div>
+                    <div class="kpi__value" style="font-size:15px;font-weight:500;line-height:1.4;">현장 운영 권한 확인</div></div>
+            </div>
+
+            <div class="panel">
+                <div style="max-width:640px;background:#000;border-radius:8px;overflow:hidden;">
+                    <div id="player"></div>
+                </div>
+                <div class="lms-progress">
+                    <div class="lms-progress__track"><div class="lms-progress__fill" id="bar" style="width:0%"></div></div>
+                    <div class="lms-progress__goal" style="left:95%"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:13px;color:var(--text-muted);">
+                    <span class="mono">시청률 <span id="rate">0.0%</span></span>
+                    <span>영상 끝(95%)에 도달하면 이수 완료</span>
+                </div>
+                <p th:if="${training.description != null}" style="margin-top:14px;color:var(--text-muted);font-size:14px;"
+                   th:text="${training.description}">설명</p>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const AID = [[${assignment.id}]];
+    const VIDEO_ID = [[${training.youtubeVideoId}]];
+    const INITIAL_RATE = [[${assignment.progressRate}]];
+    const csrfToken = document.querySelector('meta[name=_csrf]').content;
+    const csrfHeader = document.querySelector('meta[name=_csrf_header]').content;
+    let player, timer;
+
+    function render(rate, label, status) {
+        document.getElementById('rate').textContent = (Math.round(rate * 10) / 10).toFixed(1) + '%';
+        document.getElementById('bar').style.width = Math.min(100, rate) + '%';
+        if (label) document.getElementById('statusText').textContent = label;
+        if (status === 'COMPLETED') {
+            const b = document.getElementById('badge');
+            b.className = 'badge green';
+            b.textContent = '이수완료';
+        }
+    }
+
+    async function tick() {
+        if (!player || !player.getCurrentTime) return;
+        const pos = Math.floor(player.getCurrentTime() || 0);
+        const dur = Math.floor(player.getDuration() || 0);
+        try {
+            const res = await fetch('/event/trainings/' + AID + '/progress', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken},
+                body: new URLSearchParams({positionSec: pos, durationSec: dur})
+            });
+            const d = await res.json();
+            if (d.rate != null) render(d.rate, d.label, d.status);
+        } catch (e) { /* 일시 오류는 다음 주기에 재시도 */ }
+    }
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            height: '360', width: '100%', videoId: VIDEO_ID,
+            events: {onStateChange: onState}
+        });
+    }
+
+    function onState(e) {
+        if (e.data === YT.PlayerState.PLAYING) {
+            if (!timer) timer = setInterval(tick, 5000);
+        } else {
+            clearInterval(timer); timer = null;
+        }
+        if (e.data === YT.PlayerState.ENDED) tick();
+    }
+
+    render(INITIAL_RATE, null, [[${assignment.status.name()}]]);
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+</script>
+</body>
+</html>

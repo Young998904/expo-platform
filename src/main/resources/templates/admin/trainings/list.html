@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교육 관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('trainings')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('교육 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">교육 관리</h1>
+                <a class="btn primary" th:href="@{/admin/trainings/new}"><i class="ti ti-plus" aria-hidden="true"></i> 교육 생성</a>
+            </div>
+
+            <div class="flash success" th:if="${message}" th:text="${message}"></div>
+
+            <div class="panel">
+                <table class="data-table" th:unless="${trainings.isEmpty()}">
+                    <thead><tr><th>제목</th><th>영상 ID</th><th>등록일</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="t : ${trainings}">
+                        <td th:text="${t.title}">제목</td>
+                        <td class="mono" style="font-size:12px;" th:text="${t.youtubeVideoId}">ID</td>
+                        <td style="font-size:13px;color:var(--text-muted);" th:text="${#temporals.format(t.createdAt, 'yyyy-MM-dd')}">날짜</td>
+                        <td><a class="btn sm" th:href="@{/admin/trainings/{id}(id=${t.id})}">배정·수강율</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-empty" th:if="${trainings.isEmpty()}">등록된 교육이 없습니다.</div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
