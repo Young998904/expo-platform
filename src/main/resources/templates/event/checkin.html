@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>현장 체크인</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: eventSidebar('checkin')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('현장 체크인')}"></header>
+        <main class="content">
+            <div class="content-head"><h1 class="page-title">현장 체크인</h1></div>
+
+            <div class="flash success" th:if="${message}" th:text="${message}"></div>
+            <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+            <div class="panel" style="max-width:520px;">
+                <h2>입장 코드 확인</h2>
+                <p style="color:var(--text-muted);font-size:14px;">입장 배지의 코드(또는 예약번호)를 입력하면 입장 처리됩니다.</p>
+                <form th:action="@{/event/checkin}" method="post" style="display:flex;gap:8px;margin-top:12px;">
+                    <input type="text" name="code" placeholder="입장 코드 또는 RSV-번호" required autofocus style="flex:1;">
+                    <button type="submit" class="btn primary"><i class="ti ti-qrcode" aria-hidden="true"></i> 체크인</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

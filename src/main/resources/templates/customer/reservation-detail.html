@@ -28,12 +28,51 @@
     </div>
 
     <div class="flash success" th:if="${message}" th:text="${message}"></div>
+    <div class="flash error" th:if="${error}" th:text="${error}"></div>
 
-    <!-- 예약 진행 -->
     <div class="stepline">
         <div class="step" th:classappend="${reservation.status.ordinal() >= 0} ? 'done'">결제대기</div>
         <div class="step" th:classappend="${reservation.status.ordinal() >= 1} ? 'done'">예약확정</div>
         <div class="step" th:classappend="${reservation.status.ordinal() >= 2} ? 'done'">입장완료</div>
+    </div>
+
+    <!-- 결제대기: 결제 진행 -->
+    <div class="panel" th:if="${reservation.status.name() == 'PENDING'}">
+        <h2>결제</h2>
+        <div>청구 금액 <b class="price" th:text="${#numbers.formatInteger(reservation.amount, 0, 'COMMA')} + '원'">0원</b></div>
+        <button th:if="${portoneEnabled}" type="button" class="btn primary" style="margin-top:12px;" onclick="payWithKakao()">
+            카카오페이로 결제
+        </button>
+        <form th:unless="${portoneEnabled}" th:action="@{/customer/reservations/{id}/pay(id=${reservation.id})}" method="post" style="margin-top:12px;">
+            <button type="submit" class="btn primary">결제하기</button>
+            <span class="eyebrow" style="margin-left:8px;">테스트 결제 · Mock</span>
+        </form>
+    </div>
+
+    <!-- 확정/입장: 디지털 입장 배지 -->
+    <div class="ticket" th:if="${reservation.status.name() == 'CONFIRMED' or reservation.status.name() == 'CHECKED_IN'}"
+         style="max-width:380px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="ticket__eyebrow">ADMISSION</span>
+            <span class="badge" th:classappend="${reservation.status.name() == 'CHECKED_IN'} ? 'green' : 'cyan'"
+                  th:text="${reservation.status.name() == 'CHECKED_IN'} ? '입장완료' : '입장권'">입장권</span>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:14px;align-items:center;">
+            <div style="background:#fff;border-radius:8px;padding:7px;line-height:0;">
+                <img th:src="@{/customer/reservations/{id}/qr(id=${reservation.id})}" alt="입장 QR" width="96" height="96">
+            </div>
+            <div>
+                <div style="font-size:15px;font-weight:500;color:#fff;" th:text="${reservation.expo.title}">행사</div>
+                <div style="font-size:12px;color:#9db2c2;margin-top:2px;"
+                     th:text="${reservation.expo.startAt != null} ? ${#temporals.format(reservation.expo.startAt, 'M월 d일 HH:mm')} : ''">일정</div>
+                <div class="mono" style="font-size:12px;color:var(--cyan);margin-top:8px;"
+                     th:text="${reservation.reservationNo} + ' · ' + ${reservation.headcount} + '인'">번호</div>
+            </div>
+        </div>
+        <div class="ticket__perf">
+            <span class="mono" style="font-size:11px;color:#9db2c2;">CODE</span>
+            <span class="mono" style="font-size:12px;color:#EAF2F6;" th:text="${reservation.checkinToken}">TOKEN</span>
+        </div>
     </div>
 
     <div class="panel">
@@ -45,11 +84,29 @@
         <div class="info-row"><span class="label">예약 일시</span>
             <span th:text="${#temporals.format(reservation.createdAt, 'yyyy-MM-dd HH:mm')}">-</span></div>
     </div>
-
-    <div class="panel" th:if="${reservation.status.name() == 'PENDING'}">
-        <h2>결제</h2>
-        <p style="color:var(--text-muted);">결제(카카오페이)·QR 티켓 발급은 다음 단계(M3)에서 연결됩니다. 결제가 완료되면 예약이 확정되고 입장 배지가 발급됩니다.</p>
-    </div>
 </main>
+
+<script th:if="${portoneEnabled}" src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+<script th:if="${portoneEnabled}" th:inline="javascript">
+    const STORE_ID = [[${storeId}]];
+    const CHANNEL_KEY = [[${channelKey}]];
+    const RID = [[${reservation.id}]];
+    const AMOUNT = [[${reservation.amount}]];
+    const ORDER = [[${reservation.expo.title}]];
+
+    async function payWithKakao() {
+        const paymentId = "rsv-" + RID + "-" + Date.now();
+        try {
+            const res = await PortOne.requestPayment({
+                storeId: STORE_ID, channelKey: CHANNEL_KEY, paymentId: paymentId,
+                orderName: "박람회 예약 · " + ORDER, totalAmount: AMOUNT,
+                currency: "CURRENCY_KRW", payMethod: "EASY_PAY",
+                redirectUrl: window.location.origin + "/customer/reservations/" + RID + "/pay/complete"
+            });
+            if (res && res.code != null) { alert("결제 실패: " + res.message); return; }
+            window.location.href = "/customer/reservations/" + RID + "/pay/complete?paymentId=" + encodeURIComponent(res.paymentId);
+        } catch (e) { alert("결제 중 오류가 발생했습니다: " + e.message); }
+    }
+</script>
 </body>
 </html>

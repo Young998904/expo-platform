@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 예약 생성·조회. 좌석 잔여는 CONFIRMED·CHECKED_IN 인원 합 기준으로 계산한다.
@@ -74,5 +76,56 @@ public class ReservationService {
 
     private String generateReservationNo() {
         return "RSV-" + Long.toString(System.currentTimeMillis(), 36).toUpperCase();
+    }
+
+    /**
+     * 결제 확정. PENDING → CONFIRMED로 전이하며 좌석을 최종 재검증하고 QR용 체크인 토큰을 발급한다.
+     * 이미 확정된 예약이면 아무 것도 하지 않는다(콜백 재진입 멱등성).
+     */
+    public void confirmPayment(Long reservationId, PaymentProvider provider, String paymentId) {
+        Reservation r = getDetail(reservationId);
+        if (r.getStatus() == ReservationStatus.CONFIRMED || r.getStatus() == ReservationStatus.CHECKED_IN) {
+            return;
+        }
+        if (r.getStatus() != ReservationStatus.PENDING) {
+            throw new IllegalStateException("결제할 수 없는 예약 상태입니다.");
+        }
+        if (r.getHeadcount() > remainingSeats(r.getExpo())) {
+            throw new IllegalStateException("좌석이 마감되어 결제를 완료할 수 없습니다.");
+        }
+        r.setStatus(ReservationStatus.CONFIRMED);
+        r.setPaidAt(LocalDateTime.now());
+        r.setCheckinToken(UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase());
+
+        Payment payment = new Payment();
+        payment.setProvider(provider);
+        payment.setPaymentId(paymentId);
+        payment.setAmount(r.getAmount());
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaidAt(r.getPaidAt());
+        r.addPayment(payment);
+    }
+
+    /**
+     * 현장 체크인. 체크인 코드 또는 예약번호로 예약을 찾아 CHECKED_IN으로 전이한다.
+     * @param managedExpoId 담당 박람회 제한(null이면 전체 허용, 전체 관리자)
+     */
+    public Reservation checkIn(String code, Long managedExpoId) {
+        String key = code == null ? "" : code.trim();
+        Reservation r = reservationRepository.findByCheckinToken(key)
+                .or(() -> reservationRepository.findByReservationNo(key))
+                .orElseThrow(() -> new IllegalArgumentException("해당 코드의 예약을 찾을 수 없습니다."));
+        if (managedExpoId != null && !r.getExpo().getId().equals(managedExpoId)) {
+            throw new IllegalStateException("담당 박람회의 예약이 아닙니다.");
+        }
+        if (r.getStatus() == ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("이미 체크인된 예약입니다.");
+        }
+        if (r.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalStateException("확정된 예약만 체크인할 수 있습니다.");
+        }
+        r.setStatus(ReservationStatus.CHECKED_IN);
+        r.setCheckedInAt(LocalDateTime.now());
+        return r;
     }
 }

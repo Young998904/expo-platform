@@ -37,6 +37,10 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // QR 코드 생성(입장 배지)
+    implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.google.zxing:javase:3.5.3'
+
     // H2 내장 DB (개발/시연용 파일 모드)
     runtimeOnly 'com.h2database:h2'
     // MySQL 드라이버 (추후 전환 시 사용)

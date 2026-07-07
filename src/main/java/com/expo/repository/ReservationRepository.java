@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 예약 저장소. 목록은 연관 엔티티를 fetch join 해 N+1을 피한다.
@@ -15,6 +16,10 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     long countByExpoId(Long expoId);
+
+    Optional<Reservation> findByReservationNo(String reservationNo);
+
+    Optional<Reservation> findByCheckinToken(String checkinToken);
 
     // 특정 박람회의 점유 좌석 수(CONFIRMED·CHECKED_IN 인원 합)
     @Query("""
