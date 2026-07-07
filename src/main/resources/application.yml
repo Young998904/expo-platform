@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: expo-platform
+
+  # H2 내장 DB(파일 모드) - 데이터는 ./data/expodb.mv.db 로 저장되어 재기동 후에도 유지
+  datasource:
+    url: jdbc:h2:file:./data/expodb;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  thymeleaf:
+    cache: false
+
+# 결제(PortOne V2) 설정 - 세 값이 비어 있으면 Mock 결제로 자동 폴백
+# 실제 연동 시 키는 환경변수로 주입하고 깃에는 올리지 않는다.
+portone:
+  store-id: ${PORTONE_STORE_ID:}
+  channel-key: ${PORTONE_CHANNEL_KEY:}
+  api-secret: ${PORTONE_API_SECRET:}
