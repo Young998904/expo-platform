@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'예약 ' + ${reservation.reservationNo}">예약 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="portal-top">
+    <a th:href="@{/customer/home}" class="portal-brand" style="text-decoration:none;">expo<span>·portal</span></a>
+    <div style="display:flex;gap:14px;align-items:center;">
+        <a th:href="@{/customer/reservations}" style="color:#CFE3E8;font-size:14px;">내 예약</a>
+        <form th:action="@{/customer/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-text" style="color:#fff;">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+<main class="portal-content">
+    <div class="content-head">
+        <h1 class="page-title">예약 상세
+            <span class="badge"
+                  th:classappend="${reservation.status.name() == 'CONFIRMED' ? 'cyan' : (reservation.status.name() == 'CHECKED_IN' ? 'green' : (reservation.status.name() == 'PENDING' ? 'orange' : ''))}"
+                  th:text="${reservation.status.label}">상태</span>
+        </h1>
+        <a class="btn" th:href="@{/customer/reservations}">목록으로</a>
+    </div>
+
+    <div class="flash success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- 예약 진행 -->
+    <div class="stepline">
+        <div class="step" th:classappend="${reservation.status.ordinal() >= 0} ? 'done'">결제대기</div>
+        <div class="step" th:classappend="${reservation.status.ordinal() >= 1} ? 'done'">예약확정</div>
+        <div class="step" th:classappend="${reservation.status.ordinal() >= 2} ? 'done'">입장완료</div>
+    </div>
+
+    <div class="panel">
+        <div class="info-row"><span class="label">예약번호</span><span class="mono" th:text="${reservation.reservationNo}">RSV</span></div>
+        <div class="info-row"><span class="label">행사</span><span th:text="${reservation.expo.title}">행사</span></div>
+        <div class="info-row"><span class="label">인원</span><span th:text="${reservation.headcount} + '명'">1명</span></div>
+        <div class="info-row"><span class="label">결제 금액</span>
+            <span class="price" th:text="${#numbers.formatInteger(reservation.amount, 0, 'COMMA')} + '원'">0원</span></div>
+        <div class="info-row"><span class="label">예약 일시</span>
+            <span th:text="${#temporals.format(reservation.createdAt, 'yyyy-MM-dd HH:mm')}">-</span></div>
+    </div>
+
+    <div class="panel" th:if="${reservation.status.name() == 'PENDING'}">
+        <h2>결제</h2>
+        <p style="color:var(--text-muted);">결제(카카오페이)·QR 티켓 발급은 다음 단계(M3)에서 연결됩니다. 결제가 완료되면 예약이 확정되고 입장 배지가 발급됩니다.</p>
+    </div>
+</main>
+</body>
+</html>

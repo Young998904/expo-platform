@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>박람회 둘러보기</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="portal-top">
+    <a th:href="@{/customer/home}" class="portal-brand" style="text-decoration:none;">expo<span>·portal</span></a>
+    <div style="display:flex;gap:14px;align-items:center;">
+        <a th:href="@{/customer/reservations}" style="color:#CFE3E8;font-size:14px;">내 예약</a>
+        <form th:action="@{/customer/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-text" style="color:#fff;">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+<main class="portal-content">
+    <div class="content-head">
+        <h1 class="page-title">지금 열린 박람회</h1>
+        <form th:action="@{/customer/home}" method="get" style="display:flex;gap:8px;">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="행사명 검색" style="width:180px;">
+            <button class="btn" type="submit">검색</button>
+        </form>
+    </div>
+
+    <div class="flash success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="expo-grid" th:unless="${expos.isEmpty()}">
+        <a th:each="e : ${expos}" th:href="@{/customer/expos/{id}(id=${e.id})}"
+           class="expo-card" style="text-decoration:none;color:inherit;"
+           th:with="rem=${remaining.get(e.id)},pct=${e.capacity > 0 ? (e.capacity - rem) * 100 / e.capacity : 0}">
+            <div class="expo-card__banner">
+                <span class="hall-tag" th:text="${e.category != null and !e.category.isEmpty()} ? ${e.category} : '박람회'">카테고리</span>
+            </div>
+            <div class="expo-card__body">
+                <div style="font-size:15px;font-weight:500;" th:text="${e.title}">제목</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:3px;"
+                     th:text="(${e.startAt != null} ? ${#temporals.format(e.startAt, 'M월 d일 HH:mm')} : '일정 미정') + ' · ' + (${e.venue} ?: '')">일정</div>
+                <div style="margin-top:12px;">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);">
+                        <span>남은 좌석</span><span class="mono" th:text="${rem} + ' / ' + ${e.capacity}">0 / 0</span>
+                    </div>
+                    <div class="meter"><div class="meter__fill" th:style="'width:' + ${pct} + '%'"></div></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+                    <span class="price" th:text="${e.price > 0} ? (${#numbers.formatInteger(e.price, 0, 'COMMA')} + '원') : '무료'">가격</span>
+                    <span class="badge cyan">예약 가능</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="panel" th:if="${expos.isEmpty()}">
+        <div class="table-empty">조건에 맞는 열린 박람회가 없습니다.</div>
+    </div>
+</main>
+</body>
+</html>

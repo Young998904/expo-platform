@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>박람회 관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('expos')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('박람회 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">박람회 관리</h1>
+                <a class="btn primary" th:href="@{/admin/expos/new}"><i class="ti ti-plus" aria-hidden="true"></i> 박람회 개설</a>
+            </div>
+
+            <div class="flash success" th:if="${message}" th:text="${message}"></div>
+            <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+            <div class="panel">
+                <table class="data-table" th:unless="${expos.isEmpty()}">
+                    <thead>
+                    <tr><th>코드</th><th>제목</th><th>카테고리</th><th>일정</th><th>가격</th><th>좌석</th><th>상태</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${expos}">
+                        <td class="mono" style="font-size:12px;" th:text="${e.code}">CODE</td>
+                        <td th:text="${e.title}">제목</td>
+                        <td th:text="${e.category}">카테고리</td>
+                        <td th:text="${e.startAt != null} ? ${#temporals.format(e.startAt, 'yyyy-MM-dd HH:mm')} : '-'">일정</td>
+                        <td class="num" th:text="${#numbers.formatInteger(e.price, 0, 'COMMA')} + '원'">0원</td>
+                        <td class="num" th:text="${e.capacity}">0</td>
+                        <td><span class="badge"
+                                  th:classappend="${e.status.name() == 'OPEN' ? 'cyan' : (e.status.name() == 'CLOSED' ? 'orange' : '')}"
+                                  th:text="${e.status.label}">상태</span></td>
+                        <td class="actions" style="white-space:nowrap;">
+                            <a class="btn sm" th:href="@{/admin/expos/{id}/edit(id=${e.id})}">수정</a>
+                            <form class="inline-form" method="post" th:action="@{/admin/expos/{id}/delete(id=${e.id})}"
+                                  onsubmit="return confirm('삭제하시겠습니까?');">
+                                <button type="submit" class="btn sm danger">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-empty" th:if="${expos.isEmpty()}">개설된 박람회가 없습니다. ‘박람회 개설’로 첫 행사를 만들어 보세요.</div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

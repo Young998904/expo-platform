@@ -24,4 +24,9 @@ PORTONE_STORE_ID, PORTONE_CHANNEL_KEY, PORTONE_API_SECRET
 
 ## 진행 상황
 - [x] M1 기반(프로젝트·보안·관리자 로그인·시드)
-- [ ] M2 박람회·예약  [ ] M3 결제·QR·체크인  [ ] M4 관리자  [ ] M5 LMS
+- [x] 디자인 시스템(전시장 웨이파인딩)
+- [x] M2 박람회·예약(Expo CRUD+코드발급 · 고객 로그인 · 행사목록/상세 · 예약)
+- [ ] M3 결제·QR·체크인  [ ] M4 관리자  [ ] M5 LMS
+
+## 시연 계정
+- 전체 관리자 `admin / admin123` · 박람회 관리자 `event1 / event123` · 고객 `01012345678 / 1234`

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 예약</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="portal-top">
+    <a th:href="@{/customer/home}" class="portal-brand" style="text-decoration:none;">expo<span>·portal</span></a>
+    <div style="display:flex;gap:14px;align-items:center;">
+        <a th:href="@{/customer/home}" style="color:#CFE3E8;font-size:14px;">둘러보기</a>
+        <form th:action="@{/customer/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-text" style="color:#fff;">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+<main class="portal-content">
+    <div class="content-head"><h1 class="page-title">내 예약</h1></div>
+    <div class="flash success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="panel">
+        <table class="data-table" th:unless="${reservations.isEmpty()}">
+            <thead><tr><th>예약번호</th><th>행사</th><th>인원</th><th>금액</th><th>상태</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${reservations}">
+                <td class="mono" style="font-size:12px;" th:text="${r.reservationNo}">RSV</td>
+                <td th:text="${r.expo.title}">행사</td>
+                <td class="num" th:text="${r.headcount}">1</td>
+                <td class="num" th:text="${#numbers.formatInteger(r.amount, 0, 'COMMA')} + '원'">0원</td>
+                <td><span class="badge"
+                          th:classappend="${r.status.name() == 'CONFIRMED' ? 'cyan' : (r.status.name() == 'CHECKED_IN' ? 'green' : (r.status.name() == 'PENDING' ? 'orange' : ''))}"
+                          th:text="${r.status.label}">상태</span></td>
+                <td><a class="btn sm" th:href="@{/customer/reservations/{id}(id=${r.id})}">상세</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="table-empty" th:if="${reservations.isEmpty()}">예약 내역이 없습니다.</div>
+    </div>
+</main>
+</body>
+</html>

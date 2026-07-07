@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${expo.title}">행사 상세</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="portal-top">
+    <a th:href="@{/customer/home}" class="portal-brand" style="text-decoration:none;">expo<span>·portal</span></a>
+    <div style="display:flex;gap:14px;align-items:center;">
+        <a th:href="@{/customer/reservations}" style="color:#CFE3E8;font-size:14px;">내 예약</a>
+        <form th:action="@{/customer/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-text" style="color:#fff;">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+<main class="portal-content" th:with="pct=${expo.capacity > 0 ? (expo.capacity - remaining) * 100 / expo.capacity : 0}">
+    <div class="content-head">
+        <h1 class="page-title" th:text="${expo.title}">행사</h1>
+        <a class="btn" th:href="@{/customer/home}">목록으로</a>
+    </div>
+
+    <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="panel">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+            <span class="badge cyan mono" th:text="${expo.code}">CODE</span>
+            <span class="badge" th:text="${expo.category}">카테고리</span>
+        </div>
+        <div class="info-row"><span class="label">일정</span>
+            <span th:text="${expo.startAt != null} ? ${#temporals.format(expo.startAt, 'yyyy-MM-dd HH:mm')} : '미정'">-</span></div>
+        <div class="info-row"><span class="label">장소</span><span th:text="${expo.venue}">-</span></div>
+        <div class="info-row"><span class="label">가격</span>
+            <span th:text="${expo.price > 0} ? (${#numbers.formatInteger(expo.price, 0, 'COMMA')} + '원') : '무료'">-</span></div>
+        <div class="info-row"><span class="label">소개</span>
+            <span th:text="${expo.description}">-</span></div>
+    </div>
+
+    <div class="panel">
+        <h2>예약</h2>
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);">
+            <span>남은 좌석</span><span class="mono" th:text="${remaining} + ' / ' + ${expo.capacity}">0 / 0</span>
+        </div>
+        <div class="meter" style="margin-bottom:16px;"><div class="meter__fill" th:style="'width:' + ${pct} + '%'"></div></div>
+
+        <div class="flash error" th:if="${remaining <= 0}" style="margin-top:0;">좌석이 매진되었습니다.</div>
+
+        <form th:action="@{/customer/expos/{id}/reserve(id=${expo.id})}" method="post"
+              th:if="${remaining > 0}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div><label class="label">인원</label><br>
+                <input type="number" name="headcount" value="1" min="1" th:max="${remaining}" style="width:90px;"></div>
+            <div><label class="label">연락처</label><br>
+                <input type="tel" name="contactPhone" placeholder="선택" style="width:160px;"></div>
+            <button type="submit" class="btn primary">예약하기</button>
+        </form>
+        <p class="eyebrow" style="margin-top:10px;">결제(카카오페이)·QR 발급은 다음 단계에서 연결됩니다.</p>
+    </div>
+</main>
+</body>
+</html>

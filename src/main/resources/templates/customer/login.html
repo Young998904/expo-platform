@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 박람회 예약</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+<main style="width:340px;padding:0 16px;">
+    <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:var(--font-disp);font-weight:700;font-size:26px;color:var(--ink);">expo<span style="color:var(--cyan);">·portal</span></div>
+        <p class="eyebrow" style="margin-top:4px;">TICKET · 고객 로그인</p>
+    </div>
+
+    <div class="panel">
+        <div th:if="${error}" class="flash error" th:text="${error}"></div>
+        <form th:action="@{/customer/login}" method="post" style="display:flex;flex-direction:column;gap:10px;">
+            <input type="tel" name="phone" placeholder="전화번호 (- 없이)" required autofocus>
+            <input type="password" name="pin" placeholder="PIN (숫자 4~6자리)" required>
+            <input type="text" name="name" placeholder="이름 (최초 이용 시)">
+            <button type="submit" class="btn primary" style="justify-content:center;padding:10px;">로그인 / 시작하기</button>
+        </form>
+        <p style="font-size:12px;color:var(--text-faint);margin:10px 0 0;">처음이면 이름까지 입력하면 바로 가입됩니다.</p>
+    </div>
+    <p style="text-align:center;color:var(--text-faint);font-size:12px;">시연 계정 · <span class="mono">01012345678 / 1234</span></p>
+</main>
+</body>
+</html>

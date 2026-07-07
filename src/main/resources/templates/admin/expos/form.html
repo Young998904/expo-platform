@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${mode == 'new'} ? '박람회 개설' : '박람회 수정'">박람회 폼</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('expos')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('박람회 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title" th:text="${mode == 'new'} ? '박람회 개설' : '박람회 수정'">박람회 개설</h1>
+                <a class="btn" th:href="@{/admin/expos}">목록으로</a>
+            </div>
+
+            <div class="panel" style="max-width:640px;">
+                <form th:object="${form}" method="post"
+                      th:action="${mode == 'new'} ? @{/admin/expos} : @{/admin/expos/{id}(id=${expo.id})}"
+                      style="display:flex;flex-direction:column;gap:14px;">
+
+                    <div><label class="label">제목</label><br>
+                        <input type="text" th:field="*{title}" required style="width:100%;"></div>
+
+                    <div style="display:flex;gap:12px;">
+                        <div style="flex:1;"><label class="label">카테고리</label><br>
+                            <input type="text" th:field="*{category}" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">장소</label><br>
+                            <input type="text" th:field="*{venue}" style="width:100%;"></div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;">
+                        <div style="flex:1;"><label class="label">시작 일시</label><br>
+                            <input type="datetime-local" th:field="*{startAt}" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">종료 일시</label><br>
+                            <input type="datetime-local" th:field="*{endAt}" style="width:100%;"></div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;">
+                        <div style="flex:1;"><label class="label">가격(원)</label><br>
+                            <input type="number" th:field="*{price}" min="0" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">총 좌석수</label><br>
+                            <input type="number" th:field="*{capacity}" min="0" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">상태</label><br>
+                            <select th:field="*{status}" style="width:100%;">
+                                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}">상태</option>
+                            </select></div>
+                    </div>
+
+                    <div><label class="label">썸네일 URL(선택)</label><br>
+                        <input type="text" th:field="*{thumbnailUrl}" placeholder="https://..." style="width:100%;"></div>
+
+                    <div><label class="label">소개</label><br>
+                        <textarea th:field="*{description}" rows="4" style="width:100%;"></textarea></div>
+
+                    <div><button type="submit" class="btn primary" th:text="${mode == 'new'} ? '개설' : '수정 저장'">저장</button></div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>
