@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP 배너 관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('banners')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('VIP 배너 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">VIP 배너 관리</h1>
+                <a class="btn primary" th:href="@{/admin/banners/new}"><i class="ti ti-plus" aria-hidden="true"></i> 배너 등록</a>
+            </div>
+
+            <div class="flash success" th:if="${message}" th:text="${message}"></div>
+
+            <div class="panel">
+                <table class="data-table" th:unless="${banners.isEmpty()}">
+                    <thead><tr><th>우선순위</th><th>제목</th><th>링크</th><th>노출기간</th><th>상태</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="b : ${banners}">
+                        <td class="num" th:text="${b.priority}">100</td>
+                        <td th:text="${b.title}">제목</td>
+                        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                            th:text="${b.linkUrl}">링크</td>
+                        <td style="font-size:12px;color:var(--text-muted);"
+                            th:text="(${b.startAt != null} ? ${#temporals.format(b.startAt,'yy-MM-dd')} : '상시') + ' ~ ' + (${b.endAt != null} ? ${#temporals.format(b.endAt,'yy-MM-dd')} : '')">기간</td>
+                        <td><span class="badge" th:classappend="${b.active} ? 'cyan' : ''" th:text="${b.active} ? '노출중' : '숨김'">상태</span></td>
+                        <td style="white-space:nowrap;">
+                            <form class="inline-form" method="post" th:action="@{/admin/banners/{id}/toggle(id=${b.id})}">
+                                <button type="submit" class="btn sm" th:text="${b.active} ? '숨기기' : '노출'">토글</button>
+                            </form>
+                            <form class="inline-form" method="post" th:action="@{/admin/banners/{id}/delete(id=${b.id})}"
+                                  onsubmit="return confirm('삭제하시겠습니까?');">
+                                <button type="submit" class="btn sm danger">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-empty" th:if="${banners.isEmpty()}">등록된 배너가 없습니다.</div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

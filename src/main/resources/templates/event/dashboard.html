@@ -15,20 +15,32 @@
         <header th:replace="~{fragments/layout :: topbar('박람회 관리자 대시보드')}"></header>
         <main class="content">
             <div class="content-head">
-                <h1 class="page-title">담당 박람회 콘솔</h1>
+                <h1 class="page-title" th:text="${dash.hasExpo} ? ${dash.expoTitle} : '담당 박람회'">담당 박람회 콘솔</h1>
                 <span class="eyebrow">EVENT · KPI</span>
             </div>
 
-            <div class="kpi-grid">
-                <div class="kpi"><div class="kpi__label">예약 수</div><div class="kpi__value">0</div></div>
-                <div class="kpi"><div class="kpi__label">결제 금액</div><div class="kpi__value">0<small>원</small></div></div>
-                <div class="kpi"><div class="kpi__label">체크인율</div><div class="kpi__value">0<small>%</small></div></div>
-                <div class="kpi"><div class="kpi__label">좌석 소진율</div><div class="kpi__value">0<small>%</small></div></div>
+            <div th:if="${dash.hasExpo}">
+                <div class="kpi-grid">
+                    <div class="kpi"><div class="kpi__label">예약 건수</div>
+                        <div class="kpi__value" th:text="${dash.reservationCount}">0</div></div>
+                    <div class="kpi"><div class="kpi__label">결제 금액</div>
+                        <div class="kpi__value" th:text="${#numbers.formatInteger(dash.paidAmount, 0, 'COMMA')}">0<small>원</small></div></div>
+                    <div class="kpi"><div class="kpi__label">체크인율</div>
+                        <div class="kpi__value" th:text="${dash.checkinRate} + '%'">0<small>%</small></div></div>
+                    <div class="kpi"><div class="kpi__label">좌석 소진율</div>
+                        <div class="kpi__value" th:text="${dash.seatUsageRate} + '%'">0<small>%</small></div></div>
+                </div>
+                <div class="panel">
+                    <h2>좌석 현황</h2>
+                    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);">
+                        <span>점유</span><span class="mono" th:text="(${dash.capacity} - ${dash.remaining}) + ' / ' + ${dash.capacity}">0 / 0</span>
+                    </div>
+                    <div class="meter" style="margin-top:6px;"><div class="meter__fill" th:style="'width:' + ${dash.seatUsageRate} + '%'"></div></div>
+                    <a class="btn" style="margin-top:14px;" th:href="@{/event/reservations}">예약자 명단 보기</a>
+                </div>
             </div>
-
-            <div class="panel">
-                <h2>담당 박람회 운영</h2>
-                <p>예약자 명단·체크인·콘텐츠 편집·교육 수강이 이 콘솔에 구현됩니다.</p>
+            <div class="panel" th:unless="${dash.hasExpo}">
+                <div class="table-empty">담당 박람회가 지정되지 않았습니다.</div>
             </div>
         </main>
     </div>

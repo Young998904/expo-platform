@@ -39,6 +39,34 @@ public class ReservationService {
         return reservationRepository.findByCustomerWithExpo(customerId);
     }
 
+    /** 박람회 예약자 명단(이름/전화/예약번호 검색 + 상태 필터). */
+    @Transactional(readOnly = true)
+    public List<Reservation> listForExpo(Long expoId, String keyword, ReservationStatus status) {
+        if (expoId == null) {
+            return List.of();
+        }
+        String kw = keyword == null ? "" : keyword.trim().toLowerCase();
+        return reservationRepository.findByExpoWithCustomer(expoId).stream()
+                .filter(r -> status == null || r.getStatus() == status)
+                .filter(r -> kw.isEmpty()
+                        || r.getCustomer().getName().toLowerCase().contains(kw)
+                        || (r.getCustomer().getPhone() != null && r.getCustomer().getPhone().contains(kw))
+                        || r.getReservationNo().toLowerCase().contains(kw))
+                .toList();
+    }
+
+    /** 예약 취소(관리자). 입장 완료 건은 취소할 수 없다. */
+    public void cancel(Long id, Long managedExpoId) {
+        Reservation r = getDetail(id);
+        if (managedExpoId != null && !r.getExpo().getId().equals(managedExpoId)) {
+            throw new IllegalStateException("담당 박람회의 예약이 아닙니다.");
+        }
+        if (r.getStatus() == ReservationStatus.CHECKED_IN) {
+            throw new IllegalStateException("입장 완료된 예약은 취소할 수 없습니다.");
+        }
+        r.setStatus(ReservationStatus.CANCELLED);
+    }
+
     @Transactional(readOnly = true)
     public Reservation getDetail(Long id) {
         return reservationRepository.findById(id)

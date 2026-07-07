@@ -28,6 +28,16 @@
 
     <div class="flash success" th:if="${message}" th:text="${message}"></div>
 
+    <!-- VIP 배너 -->
+    <div th:if="${!banners.isEmpty()}" style="display:flex;gap:12px;overflow-x:auto;margin-bottom:18px;">
+        <a th:each="b : ${banners}"
+           th:href="${b.linkUrl != null and !b.linkUrl.isEmpty()} ? ${b.linkUrl} : '#'"
+           style="flex:0 0 auto;min-width:240px;background:var(--ink);color:#fff;border-radius:12px;padding:16px;text-decoration:none;">
+            <span class="badge cyan">VIP</span>
+            <div style="font-weight:500;margin-top:8px;" th:text="${b.title}">배너</div>
+        </a>
+    </div>
+
     <div class="expo-grid" th:unless="${expos.isEmpty()}">
         <a th:each="e : ${expos}" th:href="@{/customer/expos/{id}(id=${e.id})}"
            class="expo-card" style="text-decoration:none;color:inherit;"

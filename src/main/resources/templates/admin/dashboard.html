@@ -20,16 +20,35 @@
             </div>
 
             <div class="kpi-grid">
-                <div class="kpi"><div class="kpi__label">총 박람회</div><div class="kpi__value">0</div></div>
-                <div class="kpi"><div class="kpi__label">총 예약</div><div class="kpi__value">0</div></div>
-                <div class="kpi"><div class="kpi__label">총 매출</div><div class="kpi__value">0<small>원</small></div></div>
-                <div class="kpi"><div class="kpi__label">평균 체크인율</div><div class="kpi__value">0<small>%</small></div></div>
+                <div class="kpi"><div class="kpi__label">총 박람회</div>
+                    <div class="kpi__value" th:text="${dash.totalExpos}">0</div></div>
+                <div class="kpi"><div class="kpi__label">총 예약</div>
+                    <div class="kpi__value" th:text="${dash.totalReservations}">0</div></div>
+                <div class="kpi"><div class="kpi__label">총 매출</div>
+                    <div class="kpi__value" th:text="${#numbers.formatInteger(dash.totalRevenue, 0, 'COMMA')}">0<small>원</small></div></div>
+                <div class="kpi"><div class="kpi__label">평균 체크인율</div>
+                    <div class="kpi__value" th:text="${dash.avgCheckinRate} + '%'">0<small>%</small></div></div>
             </div>
 
             <div class="panel">
-                <h2>디자인 시스템 적용 완료</h2>
-                <p>전시장 웨이파인딩 컨셉의 토큰·컴포넌트가 준비되었습니다. 다음 단계에서 박람회·예약·결제·QR·LMS를 이 시스템 위에 구현합니다.</p>
-                <p class="eyebrow" style="margin-top:8px;">NEXT · M2 박람회·예약 → M3 결제·QR·체크인 → M4 관리자 → M5 LMS</p>
+                <h2>박람회별 예약 현황</h2>
+                <table class="data-table" th:unless="${dash.expoStats.isEmpty()}">
+                    <thead><tr><th>박람회</th><th>예약 건수</th><th>점유/좌석</th><th style="width:180px;">소진율</th></tr></thead>
+                    <tbody>
+                    <tr th:each="s : ${dash.expoStats}">
+                        <td th:text="${s.title}">제목</td>
+                        <td class="num" th:text="${s.reservations}">0</td>
+                        <td class="num" th:text="${s.occupied} + ' / ' + ${s.capacity}">0 / 0</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div class="meter" style="flex:1;margin:0;"><div class="meter__fill" th:style="'width:' + ${s.usageRate} + '%'"></div></div>
+                                <span class="mono" style="font-size:12px;" th:text="${s.usageRate} + '%'">0%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="table-empty" th:if="${dash.expoStats.isEmpty()}">집계할 박람회가 없습니다.</div>
             </div>
         </main>
     </div>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약자 명단</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: eventSidebar('reservations')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('예약자 명단')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">예약자 명단</h1>
+                <a class="btn" th:href="@{/event/reservations/export}"><i class="ti ti-download" aria-hidden="true"></i> CSV 다운로드</a>
+            </div>
+
+            <div class="flash success" th:if="${message}" th:text="${message}"></div>
+            <div class="flash error" th:if="${error}" th:text="${error}"></div>
+
+            <div class="panel" th:unless="${hasExpo}">
+                <div class="table-empty">담당 박람회가 지정되지 않았습니다.</div>
+            </div>
+
+            <div th:if="${hasExpo}">
+                <form th:action="@{/event/reservations}" method="get" class="row-form" style="margin-bottom:14px;">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="이름·전화·예약번호">
+                    <select name="status">
+                        <option value="">전체 상태</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+                                th:selected="${status != null and status.name() == s.name()}">상태</option>
+                    </select>
+                    <button type="submit" class="btn">검색</button>
+                </form>
+
+                <div class="panel">
+                    <table class="data-table" th:unless="${reservations.isEmpty()}">
+                        <thead><tr><th>예약번호</th><th>이름</th><th>전화</th><th>인원</th><th>금액</th><th>상태</th><th></th></tr></thead>
+                        <tbody>
+                        <tr th:each="r : ${reservations}">
+                            <td class="mono" style="font-size:12px;" th:text="${r.reservationNo}">RSV</td>
+                            <td th:text="${r.customer.name}">이름</td>
+                            <td class="mono" style="font-size:12px;" th:text="${r.customer.phone}">전화</td>
+                            <td class="num" th:text="${r.headcount}">1</td>
+                            <td class="num" th:text="${#numbers.formatInteger(r.amount, 0, 'COMMA')} + '원'">0원</td>
+                            <td><span class="badge"
+                                      th:classappend="${r.status.name() == 'CONFIRMED' ? 'cyan' : (r.status.name() == 'CHECKED_IN' ? 'green' : (r.status.name() == 'PENDING' ? 'orange' : ''))}"
+                                      th:text="${r.status.label}">상태</span></td>
+                            <td>
+                                <form class="inline-form" method="post" th:action="@{/event/reservations/{id}/cancel(id=${r.id})}"
+                                      th:if="${r.status.name() != 'CHECKED_IN' and r.status.name() != 'CANCELLED'}"
+                                      onsubmit="return confirm('예약을 취소하시겠습니까?');">
+                                    <button type="submit" class="btn sm danger">취소</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="table-empty" th:if="${reservations.isEmpty()}">예약자가 없습니다.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배너 등록</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('banners')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('VIP 배너 관리')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">배너 등록</h1>
+                <a class="btn" th:href="@{/admin/banners}">목록으로</a>
+            </div>
+
+            <div class="panel" style="max-width:560px;">
+                <form th:object="${form}" th:action="@{/admin/banners}" method="post"
+                      style="display:flex;flex-direction:column;gap:14px;">
+                    <div><label class="label">제목</label><br>
+                        <input type="text" th:field="*{title}" required style="width:100%;"></div>
+                    <div><label class="label">이미지 URL(선택)</label><br>
+                        <input type="text" th:field="*{imageUrl}" placeholder="https://..." style="width:100%;"></div>
+                    <div><label class="label">링크 URL(선택)</label><br>
+                        <input type="text" th:field="*{linkUrl}" placeholder="https://..." style="width:100%;"></div>
+                    <div style="display:flex;gap:12px;">
+                        <div style="flex:1;"><label class="label">우선순위(작을수록 먼저)</label><br>
+                            <input type="number" th:field="*{priority}" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">노출 시작(선택)</label><br>
+                            <input type="datetime-local" th:field="*{startAt}" style="width:100%;"></div>
+                        <div style="flex:1;"><label class="label">노출 종료(선택)</label><br>
+                            <input type="datetime-local" th:field="*{endAt}" style="width:100%;"></div>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:14px;">
+                        <input type="checkbox" th:field="*{active}" style="width:auto;"> 등록 즉시 노출
+                    </label>
+                    <div><button type="submit" class="btn primary">등록</button></div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

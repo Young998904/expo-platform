@@ -2,6 +2,7 @@ package com.expo.controller.customer;
 
 import com.expo.domain.Expo;
 import com.expo.security.CustomerSession;
+import com.expo.service.BannerService;
 import com.expo.service.CustomerService;
 import com.expo.service.ExpoService;
 import com.expo.service.ReservationService;
@@ -29,6 +30,7 @@ public class CustomerHomeController {
     private final ExpoService expoService;
     private final ReservationService reservationService;
     private final CustomerService customerService;
+    private final BannerService bannerService;
 
     @GetMapping({"", "/home"})
     public String home(@RequestParam(required = false) String keyword, HttpSession session, Model model) {
@@ -41,6 +43,7 @@ public class CustomerHomeController {
         model.addAttribute("expos", expos);
         model.addAttribute("remaining", remaining);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("banners", bannerService.listActive());
         model.addAttribute("customer", customerService.getById(CustomerSession.getId(session)));
         return "customer/home";
     }

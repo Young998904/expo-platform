@@ -37,4 +37,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             order by r.createdAt desc
             """)
     List<Reservation> findByCustomerWithExpo(@Param("customerId") Long customerId);
+
+    // 박람회 관리자 예약자 명단(고객 fetch join)
+    @Query("""
+            select r from Reservation r
+            join fetch r.customer
+            where r.expo.id = :expoId
+            order by r.createdAt desc
+            """)
+    List<Reservation> findByExpoWithCustomer(@Param("expoId") Long expoId);
+
+    // 매출 집계(전체 / 박람회별) — CONFIRMED·CHECKED_IN 기준
+    @Query("select coalesce(sum(r.amount), 0) from Reservation r where r.status in :statuses")
+    int sumAmount(@Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("select coalesce(sum(r.amount), 0) from Reservation r where r.expo.id = :expoId and r.status in :statuses")
+    int sumAmountByExpo(@Param("expoId") Long expoId, @Param("statuses") Collection<ReservationStatus> statuses);
+
+    // 인원 집계(전체) — 체크인율 계산용
+    @Query("select coalesce(sum(r.headcount), 0) from Reservation r where r.status in :statuses")
+    int sumHeadcountAll(@Param("statuses") Collection<ReservationStatus> statuses);
 }

@@ -2,6 +2,7 @@ package com.expo.config;
 
 import com.expo.domain.*;
 import com.expo.repository.AdminUserRepository;
+import com.expo.repository.BannerRepository;
 import com.expo.repository.CustomerRepository;
 import com.expo.repository.ExpoRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class DataSeeder implements ApplicationRunner {
     private final AdminUserRepository adminUserRepository;
     private final ExpoRepository expoRepository;
     private final CustomerRepository customerRepository;
+    private final BannerRepository bannerRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -47,6 +49,14 @@ public class DataSeeder implements ApplicationRunner {
             if (adminUserRepository.findByUsername("event1").isEmpty()) {
                 save("event1", "event123", "리빙페어 운영", Role.EVENT_ADMIN, a.getId());
             }
+        }
+
+        if (bannerRepository.count() == 0) {
+            Banner banner = new Banner();
+            banner.setTitle("2026 서울 리빙 디자인 페어 · 사전예약 오픈");
+            banner.setPriority(10);
+            banner.setActive(true);
+            bannerRepository.save(banner);
         }
 
         if (customerRepository.findByPhone("01012345678").isEmpty()) {
