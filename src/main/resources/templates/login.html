@@ -6,20 +6,24 @@
     <title>로그인 - 박람회 예약 관리 플랫폼</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
-<main style="max-width:360px;margin:80px auto;padding:0 16px;">
-    <h1 style="text-align:center;">박람회 예약 관리 플랫폼</h1>
-    <p style="text-align:center;color:#888;">관리자 로그인</p>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+<main style="width:340px;padding:0 16px;">
+    <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:var(--font-disp);font-weight:700;font-size:26px;color:var(--ink);">expo<span style="color:var(--cyan);">·console</span></div>
+        <p class="eyebrow" style="margin-top:4px;">GATE · 관리자 로그인</p>
+    </div>
 
-    <div th:if="${param.error}" class="flash error" style="margin:12px 0;">아이디 또는 비밀번호가 올바르지 않습니다.</div>
-    <div th:if="${param.logout}" class="flash success" style="margin:12px 0;">로그아웃되었습니다.</div>
+    <div class="panel">
+        <div th:if="${param.error}" class="flash error">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+        <div th:if="${param.logout}" class="flash success">로그아웃되었습니다.</div>
 
-    <form th:action="@{/login}" method="post" style="display:flex;flex-direction:column;gap:10px;">
-        <input type="text" name="username" placeholder="아이디" required autofocus>
-        <input type="password" name="password" placeholder="비밀번호" required>
-        <button type="submit" class="btn primary">로그인</button>
-    </form>
-    <p style="text-align:center;color:#aaa;font-size:12px;margin-top:16px;">시연 계정: admin / admin123</p>
+        <form th:action="@{/login}" method="post" style="display:flex;flex-direction:column;gap:10px;">
+            <input type="text" name="username" placeholder="아이디" required autofocus>
+            <input type="password" name="password" placeholder="비밀번호" required>
+            <button type="submit" class="btn primary" style="justify-content:center;padding:10px;">로그인</button>
+        </form>
+    </div>
+    <p style="text-align:center;color:var(--text-faint);font-size:12px;">시연 계정 · <span class="mono">admin / admin123</span></p>
 </main>
 </body>
 </html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- 전체 관리자 사이드바 -->
+<aside th:fragment="sidebar(active)" class="sidebar">
+    <div class="brand"><b>expo</b><span>·console</span></div>
+    <nav class="nav">
+        <a class="nav-item" th:classappend="${active == 'dashboard'} ? 'active'" th:href="@{/admin/dashboard}">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i><span>대시보드</span></a>
+        <a class="nav-item" th:classappend="${active == 'expos'} ? 'active'" href="#">
+            <i class="ti ti-calendar-event" aria-hidden="true"></i><span>박람회 관리</span></a>
+        <a class="nav-item" th:classappend="${active == 'accounts'} ? 'active'" href="#">
+            <i class="ti ti-id-badge-2" aria-hidden="true"></i><span>계정 관리</span></a>
+        <a class="nav-item" th:classappend="${active == 'banners'} ? 'active'" href="#">
+            <i class="ti ti-photo" aria-hidden="true"></i><span>배너 관리</span></a>
+        <div class="nav-sect">LMS</div>
+        <a class="nav-item" th:classappend="${active == 'trainings'} ? 'active'" href="#">
+            <i class="ti ti-school" aria-hidden="true"></i><span>교육 관리</span></a>
+        <a class="nav-item" th:classappend="${active == 'progress'} ? 'active'" href="#">
+            <i class="ti ti-checkbox" aria-hidden="true"></i><span>수강율</span></a>
+    </nav>
+</aside>
+
+<!-- 박람회 관리자 사이드바 -->
+<aside th:fragment="eventSidebar(active)" class="sidebar">
+    <div class="brand"><b>expo</b><span>·event</span></div>
+    <nav class="nav">
+        <a class="nav-item" th:classappend="${active == 'dashboard'} ? 'active'" th:href="@{/event/dashboard}">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i><span>대시보드</span></a>
+        <a class="nav-item" th:classappend="${active == 'reservations'} ? 'active'" href="#">
+            <i class="ti ti-users" aria-hidden="true"></i><span>예약자 명단</span></a>
+        <a class="nav-item" th:classappend="${active == 'checkin'} ? 'active'" href="#">
+            <i class="ti ti-qrcode" aria-hidden="true"></i><span>체크인</span></a>
+        <a class="nav-item" th:classappend="${active == 'content'} ? 'active'" href="#">
+            <i class="ti ti-edit" aria-hidden="true"></i><span>콘텐츠 편집</span></a>
+        <a class="nav-item" th:classappend="${active == 'training'} ? 'active'" href="#">
+            <i class="ti ti-player-play" aria-hidden="true"></i><span>교육 수강</span></a>
+    </nav>
+</aside>
+
+<!-- 상단바 -->
+<header th:fragment="topbar(title)" class="topbar">
+    <div class="topbar-title" th:text="${title}">화면 제목</div>
+    <div class="who">
+        <span sec:authentication="name">사용자</span>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn sm">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+</body>
+</html>

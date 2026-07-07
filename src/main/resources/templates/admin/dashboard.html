@@ -4,24 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">전체 관리자 대시보드</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
-<main class="content" style="padding:24px;">
-    <div class="content-head">
-        <h1 class="page-title" th:text="${title}">전체 관리자 대시보드</h1>
-        <form th:action="@{/logout}" method="post" style="margin:0;">
-            <button type="submit" class="btn">로그아웃</button>
-        </form>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+    <div class="main">
+        <header th:replace="~{fragments/layout :: topbar('전체 관리자 대시보드')}"></header>
+        <main class="content">
+            <div class="content-head">
+                <h1 class="page-title">전체 대시보드</h1>
+                <span class="eyebrow">PLATFORM · KPI</span>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi"><div class="kpi__label">총 박람회</div><div class="kpi__value">0</div></div>
+                <div class="kpi"><div class="kpi__label">총 예약</div><div class="kpi__value">0</div></div>
+                <div class="kpi"><div class="kpi__label">총 매출</div><div class="kpi__value">0<small>원</small></div></div>
+                <div class="kpi"><div class="kpi__label">평균 체크인율</div><div class="kpi__value">0<small>%</small></div></div>
+            </div>
+
+            <div class="panel">
+                <h2>디자인 시스템 적용 완료</h2>
+                <p>전시장 웨이파인딩 컨셉의 토큰·컴포넌트가 준비되었습니다. 다음 단계에서 박람회·예약·결제·QR·LMS를 이 시스템 위에 구현합니다.</p>
+                <p class="eyebrow" style="margin-top:8px;">NEXT · M2 박람회·예약 → M3 결제·QR·체크인 → M4 관리자 → M5 LMS</p>
+            </div>
+        </main>
     </div>
-    <div class="panel">
-        <h2>스캐폴딩 완료</h2>
-        <p>기반(인증·보안·레이아웃)이 준비되었습니다. 다음 단계에서 박람회 관리·예약·결제·LMS를 구현합니다.</p>
-        <ul>
-            <li>M2 박람회·예약 &nbsp;·&nbsp; M3 결제·QR·체크인 &nbsp;·&nbsp; M4 관리자 &nbsp;·&nbsp; M5 LMS</li>
-        </ul>
-    </div>
-</main>
+</div>
 </body>
 </html>
