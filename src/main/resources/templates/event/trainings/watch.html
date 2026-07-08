@@ -53,13 +53,55 @@
     </div>
 </div>
 
+<!-- 앞으로 건너뛰기 제지 모달 -->
+<div id="seekModal" class="seek-modal" hidden>
+    <div class="seek-modal__backdrop"></div>
+    <div class="seek-modal__box" role="alertdialog" aria-modal="true" aria-labelledby="seekModalTitle" aria-describedby="seekModalDesc">
+        <div class="seek-modal__mark"><i class="ti ti-player-skip-forward-filled" aria-hidden="true"></i></div>
+        <h2 id="seekModalTitle" class="seek-modal__title">앞으로 건너뛸 수 없어요</h2>
+        <p id="seekModalDesc" class="seek-modal__desc">교육 이수는 순서대로 시청한 만큼만 인정됩니다.<br>방금 지점으로 되돌렸어요. 이어서 시청해 주세요.</p>
+        <button type="button" class="btn primary" id="seekModalOk" autofocus>이어서 시청</button>
+    </div>
+</div>
+
+<style>
+    .seek-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .seek-modal[hidden] { display: none; }
+    .seek-modal__backdrop { position: absolute; inset: 0; background: rgba(18, 32, 58, .55); backdrop-filter: blur(2px); }
+    .seek-modal__box {
+        position: relative; width: min(92vw, 380px); background: var(--card);
+        border: 1px solid var(--border); border-top: 4px solid var(--orange);
+        border-radius: var(--radius-card); padding: 28px 26px 24px; text-align: center;
+        box-shadow: 0 24px 60px rgba(18, 32, 58, .28);
+        animation: seekPop .18s cubic-bezier(.2, .9, .3, 1.4);
+    }
+    @keyframes seekPop { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+    .seek-modal__mark {
+        width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 50%;
+        background: var(--orange-bg); color: var(--orange);
+        display: flex; align-items: center; justify-content: center; font-size: 26px;
+    }
+    .seek-modal__title { margin: 0 0 8px; font-family: var(--font-disp); font-size: 20px; color: var(--text); }
+    .seek-modal__desc { margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+    .seek-modal__box .btn { width: 100%; justify-content: center; }
+    @media (prefers-reduced-motion: reduce) { .seek-modal__box { animation: none; } }
+</style>
+
 <script th:inline="javascript">
     const AID = [[${assignment.id}]];
     const VIDEO_ID = [[${training.youtubeVideoId}]];
     const INITIAL_RATE = [[${assignment.progressRate}]];
+    const INITIAL_POS = [[${assignment.lastPositionSec}]];
     const csrfToken = document.querySelector('meta[name=_csrf]').content;
     const csrfHeader = document.querySelector('meta[name=_csrf_header]').content;
-    let player, timer;
+    let player, timer, guard;
+
+    // 연속 시청으로 정당하게 도달한 최대 위치(초). 이 지점을 넘어선 '앞으로 건너뛰기'는 무효 처리한다.
+    // 이전에 저장된 시청 위치까지는 이미 본 구간이므로 허용한다.
+    let allowedPos = INITIAL_POS || 0;
+    let lastCheckMs = 0;              // 직전 점검 시각(performance.now, ms)
+    const SEEK_TOLERANCE = 2;        // 버퍼링·타이밍 오차 허용치(초)
+    let reverting = false;           // 되돌리는 중 중복 경고 방지
 
     function render(rate, label, status) {
         document.getElementById('rate').textContent = (Math.round(rate * 10) / 10).toFixed(1) + '%';
@@ -87,11 +129,61 @@
         } catch (e) { /* 일시 오류는 다음 주기에 재시도 */ }
     }
 
+    // 앞으로 건너뛰기 감시. 재생 중이면 실제 경과시간만큼만 진행을 허용하고,
+    // 그 이상 앞으로 점프하면 원래 위치로 되돌린 뒤 경고한다. 되감기·재시청은 허용한다.
+    function guardSeek() {
+        if (!player || !player.getCurrentTime) return;
+        const cur = player.getCurrentTime() || 0;
+        const now = performance.now();
+        const state = player.getPlayerState();
+        const rate = player.getPlaybackRate ? player.getPlaybackRate() : 1;
+
+        // 재생 중일 때만 경과시간(×배속)만큼 전진을 허용, 일시정지 상태의 점프는 불허
+        let allowedAdvance = SEEK_TOLERANCE;
+        if (state === YT.PlayerState.PLAYING && lastCheckMs) {
+            allowedAdvance += ((now - lastCheckMs) / 1000) * rate;
+        }
+        lastCheckMs = now;
+
+        if (cur > allowedPos + allowedAdvance) {
+            if (reverting) return;                 // 되돌리는 중 중복 경고 방지
+            reverting = true;
+            player.seekTo(allowedPos, true);       // 정당하게 도달한 지점으로 복귀
+            showSeekModal();                       // 시스템 알럿 대신 커스텀 모달
+        } else if (cur > allowedPos) {
+            allowedPos = cur;                      // 정상 시청분만 진행률에 반영
+        }
+    }
+
+    // 앞으로 건너뛰기 제지 모달 열고/닫기
+    function showSeekModal() {
+        const m = document.getElementById('seekModal');
+        m.hidden = false;
+        document.getElementById('seekModalOk').focus();
+    }
+    function closeSeekModal() {
+        document.getElementById('seekModal').hidden = true;
+        reverting = false;                         // 닫힌 뒤 다시 감시 재개
+        lastCheckMs = performance.now();           // 모달 대기 시간은 경과에서 제외
+        if (player && player.playVideo) player.playVideo();
+    }
+    document.getElementById('seekModalOk').addEventListener('click', closeSeekModal);
+
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
             height: '360', width: '100%', videoId: VIDEO_ID,
-            events: {onStateChange: onState}
+            events: {onReady: onReady, onStateChange: onState}
         });
+    }
+
+    function onReady() {
+        // 수강 중이던 교육은 마지막으로 들은 지점부터 이어보기(이미 시청한 구간이라 스킵 허용)
+        if (INITIAL_POS > 0) {
+            player.seekTo(INITIAL_POS, true);
+        }
+        // 초 단위로 시킹을 상시 감시(일시정지 중 점프도 포착)
+        lastCheckMs = performance.now();
+        guard = setInterval(guardSeek, 1000);
     }
 
     function onState(e) {
