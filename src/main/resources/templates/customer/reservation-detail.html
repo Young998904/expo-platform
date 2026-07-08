@@ -40,13 +40,36 @@
     <div class="panel" th:if="${reservation.status.name() == 'PENDING'}">
         <h2>결제</h2>
         <div>청구 금액 <b class="price" th:text="${#numbers.formatInteger(reservation.amount, 0, 'COMMA')} + '원'">0원</b></div>
-        <button th:if="${portoneEnabled}" type="button" class="btn primary" style="margin-top:12px;" onclick="payWithKakao()">
+        <!-- 실제 PortOne 연동(키 설정 시): 카카오페이 결제창 호출 -->
+        <button th:if="${portoneEnabled}" type="button" class="btn kakao" style="margin-top:12px;" onclick="payWithKakao()">
             카카오페이로 결제
         </button>
-        <form th:unless="${portoneEnabled}" th:action="@{/customer/reservations/{id}/pay(id=${reservation.id})}" method="post" style="margin-top:12px;">
-            <button type="submit" class="btn primary">결제하기</button>
-            <span class="eyebrow" style="margin-left:8px;">테스트 결제 · Mock</span>
-        </form>
+
+        <!-- 키 미설정(데모): 카카오페이 결제창 시뮬레이션 후 Mock 확정 -->
+        <div th:unless="${portoneEnabled}" style="margin-top:12px;">
+            <form id="mockPayForm" th:action="@{/customer/reservations/{id}/pay(id=${reservation.id})}" method="post" hidden></form>
+            <button type="button" class="btn kakao" onclick="openKakao()">카카오페이로 결제</button>
+            <span class="eyebrow" style="margin-left:8px;">테스트 모드 · 실제 청구 없음</span>
+        </div>
+    </div>
+
+    <!-- 카카오페이 결제창(시뮬레이션) — 데모 환경의 결제대기 예약에서만 노출 -->
+    <div th:if="${!portoneEnabled and reservation.status.name() == 'PENDING'}" id="kakaoModal" class="kakao-modal" hidden>
+        <div class="kakao-modal__backdrop" onclick="closeKakao()"></div>
+        <div class="kakao-modal__sheet" role="dialog" aria-modal="true" aria-label="카카오페이 결제">
+            <div class="kakao-modal__head"><span class="kakao-modal__logo">pay</span><span>카카오페이</span></div>
+            <div class="kakao-modal__body">
+                <div class="kakao-modal__order" th:text="${reservation.expo.title}">행사</div>
+                <div class="kakao-modal__amount" th:text="${#numbers.formatInteger(reservation.amount, 0, 'COMMA')} + '원'">0원</div>
+                <div class="kakao-modal__row"><span>결제수단</span><b>카카오페이 머니</b></div>
+                <div class="kakao-modal__row"><span>결제금액</span><b th:text="${#numbers.formatInteger(reservation.amount, 0, 'COMMA')} + '원'">0원</b></div>
+                <div class="kakao-modal__note">테스트 결제입니다. 실제 청구는 발생하지 않습니다.</div>
+            </div>
+            <div class="kakao-modal__actions">
+                <button type="button" class="btn" onclick="closeKakao()">취소</button>
+                <button type="button" class="btn kakao" onclick="document.getElementById('mockPayForm').submit()">결제하기</button>
+            </div>
+        </div>
     </div>
 
     <!-- 확정/입장: 디지털 입장 배지 -->
@@ -85,6 +108,12 @@
             <span th:text="${#temporals.format(reservation.createdAt, 'yyyy-MM-dd HH:mm')}">-</span></div>
     </div>
 </main>
+
+<!-- 데모 모드: 카카오페이 결제창 열고 닫기 -->
+<script th:unless="${portoneEnabled}">
+    function openKakao() { document.getElementById('kakaoModal').hidden = false; }
+    function closeKakao() { document.getElementById('kakaoModal').hidden = true; }
+</script>
 
 <script th:if="${portoneEnabled}" src="https://cdn.portone.io/v2/browser-sdk.js"></script>
 <script th:if="${portoneEnabled}" th:inline="javascript">

@@ -61,6 +61,8 @@ public class DataSeeder implements ApplicationRunner {
                 12000, 150, LocalDateTime.now().plusDays(35), ExpoStatus.OPEN);
         Expo pet = expo("2026 반려동물 페스타(좌석 임박)", "라이프", "세택(SETEC) 1관",
                 8000, 10, LocalDateTime.now().plusDays(10), ExpoStatus.OPEN);
+        Expo soldout = expo("2026 K-뷰티 콜렉션(매진)", "뷰티", "코엑스 C홀",
+                18000, 6, LocalDateTime.now().plusDays(15), ExpoStatus.OPEN);
         Expo smart = expo("2026 스마트테크 위크(준비중)", "IT·가전", "킨텍스 1홀",
                 0, 300, LocalDateTime.now().plusDays(60), ExpoStatus.DRAFT);
         Expo past = expo("2025 가을 리빙 페어(마감)", "생활·인테리어", "코엑스 B홀",
@@ -104,6 +106,10 @@ public class DataSeeder implements ApplicationRunner {
         reservation(pet, c3, 3, ReservationStatus.CONFIRMED, PaymentProvider.MOCK, 2);
         reservation(pet, c4, 3, ReservationStatus.CONFIRMED, PaymentProvider.PORTONE, 2);
         reservation(pet, c5, 3, ReservationStatus.CHECKED_IN, PaymentProvider.MOCK, 3);
+
+        // K-뷰티 콜렉션(6석 전량 점유 → 잔여 0석, '마감' 표기 확인용)
+        reservation(soldout, c2, 3, ReservationStatus.CONFIRMED, PaymentProvider.PORTONE, 4);
+        reservation(soldout, c6, 3, ReservationStatus.CHECKED_IN, PaymentProvider.MOCK, 5);
 
         // ── VIP 배너(활성/비활성/노출기간) ─────────────────────────────────────
         banner("2026 서울 리빙 디자인 페어 · 사전예약 오픈", 10, true, null, null);

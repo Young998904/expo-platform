@@ -41,6 +41,7 @@
     <div class="expo-grid" th:unless="${expos.isEmpty()}">
         <a th:each="e : ${expos}" th:href="@{/customer/expos/{id}(id=${e.id})}"
            class="expo-card" style="text-decoration:none;color:inherit;"
+           th:classappend="${remaining.get(e.id) <= 0} ? 'soldout'"
            th:with="rem=${remaining.get(e.id)},pct=${e.capacity > 0 ? (e.capacity - rem) * 100 / e.capacity : 0}">
             <div class="expo-card__banner">
                 <span class="hall-tag" th:text="${e.category != null and !e.category.isEmpty()} ? ${e.category} : '박람회'">카테고리</span>
@@ -57,7 +58,8 @@
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
                     <span class="price" th:text="${e.price > 0} ? (${#numbers.formatInteger(e.price, 0, 'COMMA')} + '원') : '무료'">가격</span>
-                    <span class="badge cyan">예약 가능</span>
+                    <span th:if="${rem <= 0}" class="badge red">마감</span>
+                    <span th:unless="${rem <= 0}" class="badge cyan">예약 가능</span>
                 </div>
             </div>
         </a>

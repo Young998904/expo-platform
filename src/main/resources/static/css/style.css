@@ -150,3 +150,42 @@ label.label, .label { font-size: 13px; color: var(--text-muted); }
 .lms-progress__track { height: 8px; border-radius: 20px; background: var(--border); overflow: hidden; }
 .lms-progress__fill { height: 100%; background: var(--cyan); }
 .lms-progress__goal { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--green); }
+
+/* 마감(매진) 배지 */
+.badge.red { background: var(--red-bg); color: var(--red); }
+
+/* 매진 카드는 흐리게 처리해 예약 불가를 한눈에 */
+.expo-card.soldout { opacity: .62; }
+.expo-card.soldout .meter__fill { background: var(--red); }
+
+/* 카카오페이 결제 버튼 */
+.btn.kakao { background: #FEE500; color: #191919; border-color: transparent; font-weight: 600; }
+.btn.kakao:hover { background: #F2D900; color: #191919; }
+
+/* 카카오페이 결제창(시뮬레이션) */
+.kakao-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.kakao-modal[hidden] { display: none; }
+.kakao-modal__backdrop { position: absolute; inset: 0; background: rgba(18, 32, 58, .55); }
+.kakao-modal__sheet {
+    position: relative; width: min(92vw, 360px); background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 24px 60px rgba(18, 32, 58, .3); animation: kakaoUp .2s cubic-bezier(.2, .9, .3, 1.3);
+}
+@keyframes kakaoUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.kakao-modal__head {
+    display: flex; align-items: center; gap: 8px; background: #FEE500; color: #191919;
+    padding: 14px 18px; font-weight: 700; font-size: 15px;
+}
+.kakao-modal__logo {
+    background: #191919; color: #FEE500; font-weight: 800; font-size: 12px;
+    padding: 2px 7px; border-radius: 5px; letter-spacing: -.5px;
+}
+.kakao-modal__body { padding: 20px 18px 8px; text-align: center; }
+.kakao-modal__order { font-size: 13px; color: var(--text-muted); }
+.kakao-modal__amount { font-family: var(--font-disp); font-size: 30px; color: var(--text); margin: 6px 0 16px; }
+.kakao-modal__row {
+    display: flex; justify-content: space-between; font-size: 13px; color: var(--text);
+    padding: 10px 4px; border-top: 1px solid var(--border);
+}
+.kakao-modal__note { margin-top: 12px; font-size: 11px; color: var(--text-faint); }
+.kakao-modal__actions { display: flex; gap: 8px; padding: 14px 18px 18px; }
+.kakao-modal__actions .btn { flex: 1; justify-content: center; }
